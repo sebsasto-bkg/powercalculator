@@ -15,7 +15,8 @@ export default {
         runtime: 14, //days
 
         visitorsPerDay: Math.ceil(561364 / 14),
-        lockedField: 'days'
+        lockedField: 'days',
+        onlyTotalVisitors: false
     },
 
     mutations: {

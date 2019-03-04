@@ -17,7 +17,9 @@ let validations = {
     impactByVisitorsPerDay: {type: 'int'},
     metricTotals: {type: 'int'},
     sdRate: {type: 'float'},
-    nonInfThreshold: {type: 'float'}
+    nonInfThreshold: {type: 'float'},
+    nonInfThresholdRelative: {type: 'percentage'},
+    nonInfThresholdAbsolute: {type: 'float'},
 }
 
 // add validation for component version of main data
