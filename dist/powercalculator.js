@@ -4832,7 +4832,7 @@
 
     function sample_size_calculation(data) {
         var { base_rate, variance, effect_size, alpha, beta, variants, alternative, mu, opts } = data;
-        
+
         if (!is_valid_input(data)) {
             return NaN;
         }

@@ -24,7 +24,7 @@ var lower = [{control_mean:  0.001, stddev: 1, mu: 0     },
 var configs = [{alternative: "two-sided", data: greater.concat(lower),  variants: 1},
                {alternative: "greater",   data: greater,                variants: 1},
                {alternative: "lower",     data: lower,                  variants: 1},
-               {alternative: "two-sided", data: greater.concat(lower),  variants: 3}];
+               {alternative: "lower",     data: lower,                  variants: 3}];
 
 var sample_size_continuous = util.sample_size_continuous();
 var replications = util.replications_power();
@@ -38,7 +38,7 @@ configs.forEach(function(config) {
         test_case.variants = config.variants;
         test("solveforeffectsize yield the expected power for continuous metrics with parameters: " + util.serialize(test_case), () => {
             var impact = statFormula.tTest.impact({
-                total_sample_size: test_case.variants*sample_size_continuous,
+                total_sample_size: (test_case.variants + 1)*sample_size_continuous,
                 base_rate: test_case.control_mean,
                 sd_rate: test_case.stddev,
                 alpha: default_fpr,
@@ -92,16 +92,17 @@ var lower_binary = [{control_rate: 0.01, mu: 0      },
 var configs_binary = [{alternative: "two-sided", data: greater_binary.concat(lower_binary), variants: 1},
                       {alternative: "greater",   data: greater_binary,                      variants: 1},
                       {alternative: "lower",     data: lower_binary,                        variants: 1},
-                      {alternative: "two-sided", data: greater_binary.concat(lower_binary), variants: 2}];
+                      {alternative: "greater",   data: greater_binary,                      variants: 2}];
 
 var sample_size = util.sample_size();
 
 configs_binary.forEach(function(config) {
     var cases = config.data;
     cases.forEach(function(test_case) {
+        test_case.variants = config.variants;
         test("solveforeffectsize yield the expected power for binary metrics with parameters: " + util.serialize(test_case), () => {
             var impact = statFormula.gTest.impact({
-                total_sample_size: test_case.variants*sample_size,
+                total_sample_size: (test_case.variants + 1)*sample_size,
                 base_rate: test_case.control_rate,
                 alpha: default_fpr,
                 beta: default_beta,
