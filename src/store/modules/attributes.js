@@ -11,12 +11,14 @@ export default {
         power: 80,
         falsePosRate: 10,
         sdRate: 10,
+        variants: 1,
 
         runtime: 14, //days
 
         visitorsPerDay: Math.ceil(561364 / 14),
         lockedField: 'days',
-        onlyTotalVisitors: false
+        onlyTotalVisitors: false,
+        comparisonMode: 'all'
     },
 
     mutations: {

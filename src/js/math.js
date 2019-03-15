@@ -1,5 +1,13 @@
 import jstat from 'jstat';
 
+function get_alpha_sidaks_correction(alpha, variants) {
+    if (variants == 1) {
+        return alpha;
+    }
+
+    return 1 - (Math.pow(1-alpha, 1/variants));
+}
+
 // SOLVING FOR POWER
 function solveforpower_Gtest(data) {
     var { base_rate, effect_size } = data;
@@ -17,8 +25,8 @@ function solveforpower_Ttest(data) {
 }
 
 function solve_for_power(data) {
-    var {total_sample_size, base_rate, variance, effect_size, alpha, alternative, mu} = data;
-    var sample_size = total_sample_size/2;
+    var {total_sample_size, base_rate, variance, effect_size, alpha, variants, alternative, mu} = data;
+    var sample_size = total_sample_size / (1 + variants);
 
     var mean_base = base_rate;
     var mean_var = base_rate * (1+effect_size);
@@ -111,7 +119,8 @@ function solveforsample_Gtest(data){
 }
 
 function sample_size_calculation(data) {
-    var { base_rate, variance, effect_size, alpha, beta, alternative, mu, opts } = data;
+    var { base_rate, variance, effect_size, alpha, beta, variants, alternative, mu, opts } = data;
+    
     if (!is_valid_input(data)) {
         return NaN;
     }
@@ -155,14 +164,14 @@ function sample_size_calculation(data) {
         }
     }
 
-    return 2*Math.ceil(sample_one_group);
+    return (1+variants)*Math.ceil(sample_one_group);
 }
 
 
 
 // SOLVING FOR EFFECT SIZE
-function solveforeffectsize_Ttest({total_sample_size, base_rate, sd_rate, alpha, beta, alternative, mu}){
-    var sample_size = total_sample_size/2;
+function solveforeffectsize_Ttest({total_sample_size, base_rate, sd_rate, alpha, beta, variants, alternative, mu}){
+    var sample_size = total_sample_size / (1 + variants);
     var variance = 2*sd_rate**2;
 
     var z = jstat.normal.inv(1-beta, 0, 1);
@@ -196,8 +205,8 @@ function solve_quadratic(Z, sample_size, control_rate, mu) {
     return [sol_h, sol_l];
 }
 
-function solveforeffectsize_Gtest({total_sample_size, base_rate, alpha, beta, alternative, mu}){
-    var sample_size = total_sample_size / 2;
+function solveforeffectsize_Gtest({total_sample_size, base_rate, alpha, beta, variants, alternative, mu}){
+    var sample_size = total_sample_size / (1 + variants);
 
     var rel_effect_size;
     var Z;
@@ -291,4 +300,5 @@ export default {
     getMuFromRelativeDifference: get_mu_from_relative_difference,
     getMuFromAbsolutePerDay: get_mu_from_absolute_per_day,
     getAlternative: get_alternative,
+    getCorrectedAlpha: get_alpha_sidaks_correction,
 }

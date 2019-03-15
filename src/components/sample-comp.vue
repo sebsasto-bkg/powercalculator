@@ -104,7 +104,6 @@ export default {
     extends: pcBlock,
     data () {
         return {
-            variants: 2,
             focusedBlock: ''
         }
     },

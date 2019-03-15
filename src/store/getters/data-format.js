@@ -7,6 +7,7 @@ let validations = {
     },
     impact: {type: 'percentage'},
     runtime: {type: 'int'},
+    variants: {type: 'int'},
     power: {type: 'percentage'},
     falsePosRate: {type: 'percentage'},
     impactByMetricValue: {

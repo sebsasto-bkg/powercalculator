@@ -31,19 +31,19 @@
 .pc-controls-left {
     grid-area: controls-left;
     display: grid;
-    grid-template-columns: min-content min-content min-content;
+    grid-template-columns: min-content min-content min-content min-content;
     grid-template-rows: auto;
     grid-template-areas:
-        "test-type traffic calc-options";
+        "test-type traffic comparison calc-options";
     align-items: center;
 }
 .pc-controls-right {
     grid-area: controls-right;
     display: grid;
-    grid-template-columns: auto min-content;
+    grid-template-columns: auto min-content min-content;
     grid-template-rows: auto;
     grid-template-areas:
-        "false-positive power";
+        "variants false-positive power";
     align-items: center;
     justify-items: end;
 }
@@ -59,7 +59,9 @@
 .pc-test-type,
 .pc-false-positive,
 .pc-power,
-.pc-traffic-mode {
+.pc-traffic-mode,
+.pc-variants,
+.pc-comparison-mode {
     font-size: 0.8em;
 }
 .pc-test-type {
@@ -68,28 +70,39 @@
 .pc-non-inferiority {
     grid-area: calc-options;
 }
+.pc-comparison-mode {
+    grid-area: comparison;
+}
 .pc-test-type-labels,
 .pc-traffic-mode-labels,
-.pc-non-inf-label {
+.pc-non-inf-label,
+.pc-comparison-mode-label {
     white-space: nowrap;
 }
 .pc-non-inferiority ,
 .pc-test-type,
-.pc-traffic-mode {
-    margin-left: 10px;
+.pc-traffic-mode,
+.pc-comparison-mode {
+    margin-left: 15px;
 }
 .pc-test-type-tooltip-wrapper {
     display: inline-block;
 }
+.pc-variants {
+    grid-area: variants;
+    white-space: nowrap;
+    align-self: end;
+}
 .pc-false-positive {
     grid-area: false-positive;
+    margin-left: 15px;
     white-space: nowrap;
     align-self: end;
 }
 .pc-power {
     grid-area: power;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: 15px;
+    margin-right: 15px;
     white-space: nowrap;
     align-self: end;
 }
@@ -196,10 +209,6 @@
 }
 
 
-/* components/impact-comp.vue */
-
-/*# sourceMappingURL=impact-comp.vue.map */
-
 /* components/pc-block-field.vue */
 
 .pc-value-field-wrapper {
@@ -238,7 +247,8 @@
 }
 .pc-non-inf-treshold-input,
 .pc-power-input,
-.pc-false-positive-input {
+.pc-false-positive-input,
+.pc-variants-input {
     display: inline-block;
     vertical-align: middle;
     padding: 4px 8px;
@@ -247,6 +257,9 @@
     border: 2px solid var(--gray);
     border-radius: 8px;
     font-size: inherit;
+}
+.pc-variants-input {
+    width: 6.5em;
 }
 .pc-top-fields-error {
     color: var(--red);
@@ -273,6 +286,10 @@
     color: var(--black);
 }
 
+
+/* components/impact-comp.vue */
+
+/*# sourceMappingURL=impact-comp.vue.map */
 
 /* components/pc-tooltip.vue */
 

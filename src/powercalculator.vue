@@ -32,21 +32,42 @@
 
                     <div class="pc-traffic-mode">
                         <label class="pc-traffic-mode-labels" slot="text">
-                            <input type="radio" name="" v-model="trafficMode" value="daily" checked :disabled="nonInferiorityEnabled">
+                            <input type="radio" name="traffic-mode" v-model="trafficMode" value="daily" checked :disabled="nonInferiorityEnabled">
                             Daily traffic
                         </label>
                         <label class="pc-traffic-mode-labels" slot="text">
-                            <input type="radio" name="" v-model="trafficMode" value="total" :disabled="nonInferiorityEnabled">
+                            <input type="radio" name="traffic-mode" v-model="trafficMode" value="total" :disabled="nonInferiorityEnabled">
                             Total traffic
                         </label>
                     </div>
 
                     <non-inferiority></non-inferiority>
+
+                    <div class="pc-comparison-mode">
+                        <label class="pc-comparison-mode-labels" slot="text">
+                            <input type="radio" name="comparison-mode" v-model="comparisonMode" value="all" checked>
+                            Base vs All variants
+                        </label>
+                        <label class="pc-traffic-mode-labels" slot="text">
+                            <input type="radio" name="comparison-mode" v-model="comparisonMode" value="one">
+                            Base vs One variant
+                        </label>
+                    </div>
                 </div>
 
                 <div class="pc-title">Power Calculator <sup style="color: #F00; font-size: 11px;">BETA</sup> </div>
 
                 <div class="pc-controls-right">
+                    <label class="pc-variants">
+                        <pc-block-field
+                            class="pc-variants-input"
+                            fieldProp="variants"
+                            prefix="base + "
+                            v-bind:fieldValue="variants"
+                            v-bind:enableEdit="true"></pc-block-field>
+                        variant{{ variants > 1 ? 's' : '' }}
+                    </label>
+
                     <label class="pc-false-positive">
                         <pc-block-field
                             class="pc-false-positive-input"
@@ -167,7 +188,8 @@ export default {
                     calculateProp: this.calculateProp,
                     view: this.view,
                     lockedField: this.lockedField,
-                    nonInferiority: this.nonInferiority
+                    nonInferiority: this.nonInferiority,
+                    comparisonMode: this.comparisonMode,
                 };
             return JSON.parse(JSON.stringify(result))
         },
@@ -185,6 +207,20 @@ export default {
         },
         power () {
             return this.$store.state.attributes.power
+        },
+        variants () {
+            return this.$store.state.attributes.variants
+        },
+        comparisonMode: {
+            get () {
+                return this.$store.state.attributes.comparisonMode
+            },
+            set (newValue) {
+                this.$store.dispatch('field:change', {
+                    prop: 'comparisonMode',
+                    value: newValue
+                })
+            }
         },
         testType: {
             get () {
@@ -304,20 +340,20 @@ export default {
 .pc-controls-left {
     grid-area: controls-left;
     display: grid;
-    grid-template-columns: min-content min-content min-content;
+    grid-template-columns: min-content min-content min-content min-content;
     grid-template-rows: auto;
     grid-template-areas:
-        "test-type traffic calc-options";
+        "test-type traffic comparison calc-options";
     align-items: center;
 }
 
 .pc-controls-right {
     grid-area: controls-right;
     display: grid;
-    grid-template-columns: auto min-content;
+    grid-template-columns: auto min-content min-content;
     grid-template-rows: auto;
     grid-template-areas:
-        "false-positive power";
+        "variants false-positive power";
     align-items: center;
     justify-items: end;
 }
@@ -336,7 +372,9 @@ export default {
 .pc-test-type,
 .pc-false-positive,
 .pc-power,
-.pc-traffic-mode {
+.pc-traffic-mode,
+.pc-variants,
+.pc-comparison-mode {
     font-size: 0.8em;
 }
 
@@ -348,32 +386,45 @@ export default {
     grid-area: calc-options;
 }
 
+.pc-comparison-mode {
+    grid-area: comparison;
+}
+
 .pc-test-type-labels,
 .pc-traffic-mode-labels,
-.pc-non-inf-label {
+.pc-non-inf-label,
+.pc-comparison-mode-label {
     white-space: nowrap;
 }
 
 .pc-non-inferiority ,
 .pc-test-type,
-.pc-traffic-mode {
-    margin-left: 10px;
+.pc-traffic-mode,
+.pc-comparison-mode {
+    margin-left: 15px;
 }
 
 .pc-test-type-tooltip-wrapper {
     display: inline-block;
 }
 
+.pc-variants {
+    grid-area: variants;
+    white-space: nowrap;
+    align-self: end;
+}
+
 .pc-false-positive {
     grid-area: false-positive;
+    margin-left: 15px;
     white-space: nowrap;
     align-self: end;
 }
 
 .pc-power {
     grid-area: power;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: 15px;
+    margin-right: 15px;
     white-space: nowrap;
     align-self: end;
 }

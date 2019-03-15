@@ -1,3 +1,7 @@
+
+/** MIT licence */
+/** https://github.com/bookingcom/powercalculator */
+
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
     typeof define === 'function' && define.amd ? define('powercalculator', factory) :
@@ -4708,6 +4712,14 @@
     });
     });
 
+    function get_alpha_sidaks_correction(alpha, variants) {
+        if (variants == 1) {
+            return alpha;
+        }
+
+        return 1 - (Math.pow(1-alpha, 1/variants));
+    }
+
     // SOLVING FOR POWER
     function solveforpower_Gtest(data) {
         var { base_rate, effect_size } = data;
@@ -4725,8 +4737,8 @@
     }
 
     function solve_for_power(data) {
-        var {total_sample_size, base_rate, variance, effect_size, alpha, alternative, mu} = data;
-        var sample_size = total_sample_size/2;
+        var {total_sample_size, base_rate, variance, effect_size, alpha, variants, alternative, mu} = data;
+        var sample_size = total_sample_size / (1 + variants);
 
         var mean_base = base_rate;
         var mean_var = base_rate * (1+effect_size);
@@ -4819,7 +4831,8 @@
     }
 
     function sample_size_calculation(data) {
-        var { base_rate, variance, effect_size, alpha, beta, alternative, mu, opts } = data;
+        var { base_rate, variance, effect_size, alpha, beta, variants, alternative, mu, opts } = data;
+        
         if (!is_valid_input(data)) {
             return NaN;
         }
@@ -4863,14 +4876,14 @@
             }
         }
 
-        return 2*Math.ceil(sample_one_group);
+        return (1+variants)*Math.ceil(sample_one_group);
     }
 
 
 
     // SOLVING FOR EFFECT SIZE
-    function solveforeffectsize_Ttest({total_sample_size, base_rate, sd_rate, alpha, beta, alternative, mu}){
-        var sample_size = total_sample_size/2;
+    function solveforeffectsize_Ttest({total_sample_size, base_rate, sd_rate, alpha, beta, variants, alternative, mu}){
+        var sample_size = total_sample_size / (1 + variants);
         var variance = 2*sd_rate**2;
 
         var z = jstat.normal.inv(1-beta, 0, 1);
@@ -4904,8 +4917,8 @@
         return [sol_h, sol_l];
     }
 
-    function solveforeffectsize_Gtest({total_sample_size, base_rate, alpha, beta, alternative, mu}){
-        var sample_size = total_sample_size / 2;
+    function solveforeffectsize_Gtest({total_sample_size, base_rate, alpha, beta, variants, alternative, mu}){
+        var sample_size = total_sample_size / (1 + variants);
 
         var rel_effect_size;
         var Z;
@@ -4999,6 +5012,7 @@
         getMuFromRelativeDifference: get_mu_from_relative_difference,
         getMuFromAbsolutePerDay: get_mu_from_absolute_per_day,
         getAlternative: get_alternative,
+        getCorrectedAlpha: get_alpha_sidaks_correction,
     };
 
     var _incrementalTrials = {
@@ -5769,6 +5783,12 @@
                         return value > 0
                     },
                     defaultVal: 0
+                },
+                variants: {
+                    fn (value) {
+                        return Number.isInteger(value) && value > 1
+                    },
+                    defaultVal: 1
                 }
             },
             gTest: {
@@ -6119,7 +6139,6 @@
         extends: pcBlock,
         data () {
             return {
-                variants: 2,
                 focusedBlock: ''
             }
         },
@@ -6405,7 +6424,7 @@
         }
     };
 
-    var powerCalculator = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-controls-left"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"gTest","checked":"checked"},domProps:{"checked":_vm._q(_vm.testType,"gTest")},on:{"change":function($event){_vm.testType="gTest";}}}),_vm._v(" Binomial Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A binomial metric is one that can be only two values like 0 or 1, yes or no, converted or not converted ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"tTest"},domProps:{"checked":_vm._q(_vm.testType,"tTest")},on:{"change":function($event){_vm.testType="tTest";}}}),_vm._v(" Continuous Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A continuous metric is one that can be any number like time on site or the number of rooms sold ")])])],1),_vm._v(" "),_c('div',{staticClass:"pc-traffic-mode"},[_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"type":"radio","name":"","value":"daily","checked":"checked","disabled":_vm.nonInferiorityEnabled},domProps:{"checked":_vm._q(_vm.trafficMode,"daily")},on:{"change":function($event){_vm.trafficMode="daily";}}}),_vm._v(" Daily traffic ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"type":"radio","name":"","value":"total","disabled":_vm.nonInferiorityEnabled},domProps:{"checked":_vm._q(_vm.trafficMode,"total")},on:{"change":function($event){_vm.trafficMode="total";}}}),_vm._v(" Total traffic ")])]),_vm._v(" "),_c('non-inferiority')],1),_vm._v(" "),_vm._m(0),_vm._v(" "),_c('div',{staticClass:"pc-controls-right"},[_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.falsePosRate > 10 },attrs:{"suffix":"%","fieldProp":"falsePosRate","fieldValue":_vm.falsePosRate,"enableEdit":true}}),_vm._v(" false positive rate ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.power < 80 },attrs:{"suffix":"%","fieldProp":"power","fieldValue":_vm.power,"enableEdit":true}}),_vm._v(" power ")],1)])]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{'pc-blocks-wrapper-ttest': _vm.testType == 'tTest'}},[_c('base-comp',{attrs:{"fieldFromBlock":"base","isBlockFocused":_vm.focusedBlock == 'base',"enableEdit":_vm.enabledMainInputs.base},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('sample-comp',{attrs:{"fieldFromBlock":"sample","enableEdit":_vm.enabledMainInputs.sample,"isBlockFocused":_vm.focusedBlock == 'sample'},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),(!_vm.nonInferiorityEnabled)?_c('impact-comp',{attrs:{"fieldFromBlock":"impact","enableEdit":_vm.enabledMainInputs.impact,"isBlockFocused":_vm.focusedBlock == 'impact'},on:{"update:focus":_vm.updateFocus}}):_vm._e(),_vm._v(" "),(_vm.nonInferiorityEnabled)?_c('non-inferiority-comp',{attrs:{"fieldFromBlock":"non-inferiority","enableEdit":_vm.enabledMainInputs['non-inferiority'],"isBlockFocused":_vm.focusedBlock == 'non-inferiority'},on:{"update:focus":_vm.updateFocus}}):_vm._e(),_vm._v(" "),_c('svg-graph')],1)])])},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("Power Calculator "),_c('sup',{staticStyle:{"color":"#F00","font-size":"11px"}},[_vm._v("BETA")])])}],
+    var powerCalculator = {render: function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"power-calculator"},[_c('form',{staticClass:"pc-form",attrs:{"action":"."}},[_c('div',{staticClass:"pc-main-header"},[_c('div',{staticClass:"pc-controls-left"},[_c('div',{staticClass:"pc-test-type"},[_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"gTest","checked":"checked"},domProps:{"checked":_vm._q(_vm.testType,"gTest")},on:{"change":function($event){_vm.testType="gTest";}}}),_vm._v(" Binomial Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A binomial metric is one that can be only two values like 0 or 1, yes or no, converted or not converted ")])]),_vm._v(" "),_c('pc-tooltip',{staticClass:"pc-test-type-tooltip-wrapper"},[_c('label',{staticClass:"pc-test-type-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.testType),expression:"testType"}],attrs:{"type":"radio","name":"test-mode","value":"tTest"},domProps:{"checked":_vm._q(_vm.testType,"tTest")},on:{"change":function($event){_vm.testType="tTest";}}}),_vm._v(" Continuous Metric ")]),_vm._v(" "),_c('span',{attrs:{"slot":"tooltip"},slot:"tooltip"},[_vm._v(" A continuous metric is one that can be any number like time on site or the number of rooms sold ")])])],1),_vm._v(" "),_c('div',{staticClass:"pc-traffic-mode"},[_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"type":"radio","name":"traffic-mode","value":"daily","checked":"checked","disabled":_vm.nonInferiorityEnabled},domProps:{"checked":_vm._q(_vm.trafficMode,"daily")},on:{"change":function($event){_vm.trafficMode="daily";}}}),_vm._v(" Daily traffic ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.trafficMode),expression:"trafficMode"}],attrs:{"type":"radio","name":"traffic-mode","value":"total","disabled":_vm.nonInferiorityEnabled},domProps:{"checked":_vm._q(_vm.trafficMode,"total")},on:{"change":function($event){_vm.trafficMode="total";}}}),_vm._v(" Total traffic ")])]),_vm._v(" "),_c('non-inferiority'),_vm._v(" "),_c('div',{staticClass:"pc-comparison-mode"},[_c('label',{staticClass:"pc-comparison-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.comparisonMode),expression:"comparisonMode"}],attrs:{"type":"radio","name":"comparison-mode","value":"all","checked":"checked"},domProps:{"checked":_vm._q(_vm.comparisonMode,"all")},on:{"change":function($event){_vm.comparisonMode="all";}}}),_vm._v(" Base vs All variants ")]),_vm._v(" "),_c('label',{staticClass:"pc-traffic-mode-labels",attrs:{"slot":"text"},slot:"text"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.comparisonMode),expression:"comparisonMode"}],attrs:{"type":"radio","name":"comparison-mode","value":"one"},domProps:{"checked":_vm._q(_vm.comparisonMode,"one")},on:{"change":function($event){_vm.comparisonMode="one";}}}),_vm._v(" Base vs One variant ")])])],1),_vm._v(" "),_vm._m(0),_vm._v(" "),_c('div',{staticClass:"pc-controls-right"},[_c('label',{staticClass:"pc-variants"},[_c('pc-block-field',{staticClass:"pc-variants-input",attrs:{"fieldProp":"variants","prefix":"base + ","fieldValue":_vm.variants,"enableEdit":true}}),_vm._v(" variant"+_vm._s(_vm.variants > 1 ? 's' : '')+" ")],1),_vm._v(" "),_c('label',{staticClass:"pc-false-positive"},[_c('pc-block-field',{staticClass:"pc-false-positive-input",class:{ 'pc-top-fields-error': _vm.falsePosRate > 10 },attrs:{"suffix":"%","fieldProp":"falsePosRate","fieldValue":_vm.falsePosRate,"enableEdit":true}}),_vm._v(" false positive rate ")],1),_vm._v(" "),_c('label',{staticClass:"pc-power"},[_c('pc-block-field',{staticClass:"pc-power-input",class:{ 'pc-top-fields-error': _vm.power < 80 },attrs:{"suffix":"%","fieldProp":"power","fieldValue":_vm.power,"enableEdit":true}}),_vm._v(" power ")],1)])]),_vm._v(" "),_c('div',{staticClass:"pc-blocks-wrapper",class:{'pc-blocks-wrapper-ttest': _vm.testType == 'tTest'}},[_c('base-comp',{attrs:{"fieldFromBlock":"base","isBlockFocused":_vm.focusedBlock == 'base',"enableEdit":_vm.enabledMainInputs.base},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),_c('sample-comp',{attrs:{"fieldFromBlock":"sample","enableEdit":_vm.enabledMainInputs.sample,"isBlockFocused":_vm.focusedBlock == 'sample'},on:{"update:focus":_vm.updateFocus}}),_vm._v(" "),(!_vm.nonInferiorityEnabled)?_c('impact-comp',{attrs:{"fieldFromBlock":"impact","enableEdit":_vm.enabledMainInputs.impact,"isBlockFocused":_vm.focusedBlock == 'impact'},on:{"update:focus":_vm.updateFocus}}):_vm._e(),_vm._v(" "),(_vm.nonInferiorityEnabled)?_c('non-inferiority-comp',{attrs:{"fieldFromBlock":"non-inferiority","enableEdit":_vm.enabledMainInputs['non-inferiority'],"isBlockFocused":_vm.focusedBlock == 'non-inferiority'},on:{"update:focus":_vm.updateFocus}}):_vm._e(),_vm._v(" "),_c('svg-graph')],1)])])},staticRenderFns: [function(){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"pc-title"},[_vm._v("Power Calculator "),_c('sup',{staticStyle:{"color":"#F00","font-size":"11px"}},[_vm._v("BETA")])])}],
         mounted () {
             // start of application
             this.$store.dispatch('init:calculator');
@@ -6446,7 +6465,8 @@
                         calculateProp: this.calculateProp,
                         view: this.view,
                         lockedField: this.lockedField,
-                        nonInferiority: this.nonInferiority
+                        nonInferiority: this.nonInferiority,
+                        comparisonMode: this.comparisonMode,
                     };
                 return JSON.parse(JSON.stringify(result))
             },
@@ -6464,6 +6484,20 @@
             },
             power () {
                 return this.$store.state.attributes.power
+            },
+            variants () {
+                return this.$store.state.attributes.variants
+            },
+            comparisonMode: {
+                get () {
+                    return this.$store.state.attributes.comparisonMode
+                },
+                set (newValue) {
+                    this.$store.dispatch('field:change', {
+                        prop: 'comparisonMode',
+                        value: newValue
+                    });
+                }
             },
             testType: {
                 get () {
@@ -6829,12 +6863,14 @@
             power: 80,
             falsePosRate: 10,
             sdRate: 10,
+            variants: 1,
 
             runtime: 14, //days
 
             visitorsPerDay: Math.ceil(561364 / 14),
             lockedField: 'days',
-            onlyTotalVisitors: false
+            onlyTotalVisitors: false,
+            comparisonMode: 'all'
         },
 
         mutations: {
@@ -7161,6 +7197,7 @@
         },
         impact: {type: 'percentage'},
         runtime: {type: 'int'},
+        variants: {type: 'int'},
         power: {type: 'percentage'},
         falsePosRate: {type: 'percentage'},
         impactByMetricValue: {
@@ -7276,10 +7313,11 @@
                 mu,
                 opts,
                 alternative,
+                variants: getters.extractValue('variants'),
                 total_sample_size: getters.extractValue('sample'),
                 base_rate: getters.extractValue('base'),
                 effect_size: getters.extractValue('impact'),
-                alpha: getters.extractValue('falsePosRate'),
+                alpha: state.attributes.comparisonMode === 'all' ? statFormulas.getCorrectedAlpha(getters.extractValue('falsePosRate'), getters.extractValue('variants')) : getters.extractValue('falsePosRate'),
                 beta: 1 - getters.extractValue('power'), // power of 80%, beta is actually 20%
                 sd_rate: getters.extractValue('sdRate')
             }
